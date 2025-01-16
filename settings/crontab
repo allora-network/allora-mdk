@@ -1,0 +1,2 @@
+# Run update-model every X interval
+0 * * * * curl http://127.0.0.1:8000/update-model > /proc/1/fd/1 2>/proc/1/fd/2
