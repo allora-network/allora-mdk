@@ -24,12 +24,14 @@ The MDK supports multiple models, including traditional statistical models like 
    - [4.1 Model Configuration](#model-configuration)
    - [4.2 Usage](#usage)
    - [4.3 API Endpoints](#api-endpoints)
-5. [Supported Models](#supported-models)
-6. [Configuration](#configuration)
-7. [Directory Structure](#directory-structure)
-8. [Data Provider](#data-provider)
-9. [Contributing](#contributing)
-10. [License](#license)
+5. [Deploy to the Network](#deploy-to-the-network)
+   - [5.1 Configure Your Environment](#configure-your-environment)
+6. [Supported Models](#supported-models)
+7. [Configuration](#configuration)
+8. [Directory Structure](#directory-structure)
+9. [Data Provider](#data-provider)
+10. [Contributing](#contributing)
+11. [License](#license)
 
 ## Features
 
@@ -305,6 +307,45 @@ The worker includes an optional automated training endpoint available at:
    - Example Usage:
 ```bash
 curl "http://127.0.0.1:8000/update-model"
+```
+
+## Deploy to the Network
+
+Now that you have a specific endpoint that can be queried for an inference output, you can paste the endpoint into your `config.json` file of your prediction node repository.
+
+### Configure Your Environment
+
+1. Copy `example.config.json` and name the copy `config.json`.
+2. Open `config.json` and update the necessary fields inside the `wallet` sub-object and worker config with your specific values:
+
+#### wallet Sub-object
+- `nodeRpc`: The [RPC URL](https://docs.allora.network/devs/get-started/setup-wallet#rpc-url-and-chain-id) for the corresponding network the node will be deployed on
+- `addressKeyName`: The name you gave your wallet key when [setting up your wallet](https://docs.allora.network/devs/get-started/setup-wallet)
+- `addressRestoreMnemonic`: The mnemonic that was outputted when setting up a new key
+
+#### worker Config
+- `topicId`: The specific topic ID you created the worker for
+- `InferenceEndpoint`: The endpoint exposed by your worker node to provide inferences to the network
+- `Token`: The token for the specific topic you are providing inferences for. The token needs to be exposed in the inference server endpoint for retrieval
+
+The `Token` variable is specific to the endpoint you expose in your `main.py` file. It is not related to any topic parameter.
+
+Then run:
+```bash
+make node-env
+make compose
+```
+
+This will load your config into your environment and spin up your docker node, which will check for open worker nonces and submit inferences to the network.
+
+If your node is working correctly, you should see it actively checking for the active worker nonce:
+```
+offchain_node    | {"level":"debug","topicId":1,"time":1723043600,"message":"Checking for latest open worker nonce on topic"}
+```
+
+A successful response from your Worker should display:
+```
+{"level":"debug","msg":"Send Worker Data to chain","txHash":<tx-hash>,"time":<timestamp>,"message":"Success"}
 ```
 
 ## Data
